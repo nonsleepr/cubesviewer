@@ -95,10 +95,8 @@ function cubesviewerViewCubeExplore() {
 		
 		var drillElements = "";
 
-		$(cube.dimensions).each( function(idx, e) {
+		$(cube.dimensions).each( function(idx, dimension) {
 			
-			var dimension = view.cubesviewer.model.getDimension(e);
-
 			if (dimension.is_flat) {
 				// Don't show drilldown option if dimension is
 				// filtered (besides, this query causes a server error)
@@ -283,7 +281,7 @@ function cubesviewerViewCubeExplore() {
 			for ( var i = 0; i < drilldown.length; i++) {
 
 				// Get dimension
-				var dimension = view.cubesviewer.model.getDimension(drilldown[i]);
+				var dimension = view.cube.getDimension(drilldown[i]);
 
 				// row["key"] = ((e[view.params.drilldown_field] != null) &&
 				// (e[view.params.drilldown] != "")) ? e[view.params.drilldown] : "Undefined";
@@ -325,7 +323,7 @@ function cubesviewerViewCubeExplore() {
 			for ( var i = 0; i < view.params.drilldown.length; i++) {
 
 				// Get dimension
-				var parts = cubesviewer.model.getDimensionParts(view.params.drilldown[i]);
+				var parts = view.cube.getDimensionParts(view.params.drilldown[i]);
 				var infos = parts.hierarchy.readCell(e, parts.level);
 				
 				// Values and Labels
@@ -424,7 +422,7 @@ function cubesviewerViewCubeExplore() {
 
 		var label = [];
 		$(view.params.drilldown).each(function(idx, e) {
-			label.push(cubesviewer.model.getDimension(e).label);
+			label.push(view.cube.getDimension(e).label);
 		})
 		for (var i = 0; i < view.params.drilldown.length; i++) {
 		
@@ -596,7 +594,7 @@ function cubesviewerViewCubeExplore() {
 	
 		$(view.params.drilldown).each(function(idx, e) {
 			
-			var dimparts = view.cubesviewer.model.getDimensionParts(e);
+			var dimparts = view.cube.getDimensionParts(e);
 			var piece = cubesviewer.views.cube.explore.drawInfoPiece(
 				$(view.container).find('.cv-view-viewinfo-drill'), "#ccffcc", 360, readonly,
 				'<span class="ui-icon ui-icon-arrowthick-1-s"></span> <b>Drilldown:</b> ' + dimparts.label 
@@ -610,7 +608,7 @@ function cubesviewerViewCubeExplore() {
 		});
 		
 		$(view.params.cuts).each(function(idx, e) { 
-			var dimparts = view.cubesviewer.model.getDimensionParts(e.dimension.replace(":",  "@"));
+			var dimparts = view.cube.getDimensionParts(e.dimension.replace(":",  "@"));
 			var piece = cubesviewer.views.cube.explore.drawInfoPiece(
 				$(view.container).find('.cv-view-viewinfo-cut'), "#ffcccc", 480, readonly,
 				'<span class="ui-icon ui-icon-zoomin"></span> <span><b>Cut: </b> ' + dimparts.label  + ' = ' + 

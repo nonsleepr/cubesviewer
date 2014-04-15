@@ -122,22 +122,21 @@ function cubesviewerViewCubeSeries() {
 		
 		// Add measures menu
 		var measuresElements = "";
-		measuresElements = measuresElements + '<li><a href="#" class="cv-view-series-setyaxis" data-measure="record_count">Record count</a></li>';
-		measuresElements = measuresElements + '<div></div>';
 		$(view.cube.measures).each(function(idx, e) {
 			
-			measuresElements = measuresElements + '<li><a href="#" onclick="return false;">' + e.name + '</a><ul style="width: 170px; z-index: 9999;">';
-			if ("aggregations" in e) {
-				$(e.aggregations).each(function(idx, ea) {
+			if ("aggregates" in e) {
+                measuresElements = measuresElements + '<li><a href="#" onclick="return false;">' + e.name + '</a><ul style="width: 170px; z-index: 9999;">';
+				$(e.aggregates).each(function(idx, ea) {
 					measuresElements = measuresElements + '<li><a href="#" class="cv-view-series-setyaxis" data-measure="' + e.name + '_' + ea + '">' + ea + '</a></li>';
 				});
-			} else {
-				measuresElements = measuresElements + '<li><a href="#" class="cv-view-series-setyaxis" data-measure="' + e.name + '_' + "sum" + '">' + "sum" + '</a></li>';
+                measuresElements = measuresElements + '</ul></li>';
 			}
-			measuresElements = measuresElements + '</ul></li>';
 			
 		});
 		
+		$(view.cube.aggregates).each(function(idx, e) {
+            measuresElements = measuresElements + '<li><a href="#" class="cv-view-series-setyaxis" data-measure="' + e.name + '">' + e.label||e.name + '</a></li>';
+		});
 		
 		menu.append(
 		  '<li><a href="#" onclick="return false;"><span class="ui-icon ui-icon-arrowthick-1-s"></span>Horizontal Dimension</a><ul style="width: 180px;">' +
@@ -270,6 +269,7 @@ function cubesviewerViewCubeSeries() {
 		);
 		
 		var colNames = [];
+        var colLabels = [];
 		var colModel = [];	
 		var dataRows = [];
 		var dataTotals = [];
@@ -285,6 +285,26 @@ function cubesviewerViewCubeSeries() {
 		// Process cells
 		view.cubesviewer.views.cube.explore._sortData (view, data.cells, view.params.xaxis != null ? true : false);
 		view.cubesviewer.views.cube.series._addRows (view, dataRows, dataTotals, colNames, colModel, data);
+
+        colNames.forEach(function (e) {
+            var colLabel = null;
+            $(view.cube.aggregates).each(function (idx, ag) {
+                if (ag.name == e) {
+                    colLabel = ag.label||ag.name;
+                    return false;
+                }
+            });
+            if (!colLabel) {
+                $(view.cube.measures).each(function (idx, me) {
+                    if (me.name == e) {
+                        colLabel = me.label||ag.name;
+                        return false;
+                    }
+                });
+            }
+            //colLabel = view.cube.getDimension(e).label
+            colLabels.push(colLabel||e);
+        });
 		
 		$('#seriesTable-' + view.id).jqGrid({ 
 			data: dataRows,
@@ -293,7 +313,7 @@ function cubesviewerViewCubeSeries() {
 			height: 'auto', 
 			rowNum: cubesviewer.options.pagingOptions[0], 
 			rowList: cubesviewer.options.pagingOptions, 
-			colNames: colNames, 
+			colNames: colLabels, 
 			colModel: colModel, 
 	        pager: "#seriesPager-" + view.id, 
 	        sortname: cubesviewer.views.cube.explore.defineColumnSort(view, ["key", "desc"])[0], 

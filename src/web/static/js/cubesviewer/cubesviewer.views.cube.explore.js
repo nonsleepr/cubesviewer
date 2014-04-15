@@ -351,7 +351,9 @@ function cubesviewerViewCubeExplore() {
 			}
 			//row["key"] = key.join(' / ');
 
-			for ( var column in data.summary) {
+			//for ( var column in data.summary) {
+            for ( var columnIdx in data.aggregates) {
+                var column = data.aggregates[columnIdx];
 				row[column] = e[column];
 			}
 
@@ -364,7 +366,9 @@ function cubesviewerViewCubeExplore() {
 		if (rows.length == 0) {
 			var row = [];
 			row["key0"] = "Summary";
-			for ( var column in data.summary) {
+			//for ( var column in data.summary) {
+            for ( var columnIdx in data.aggregates) {
+                var column = data.aggregates[columnIdx];
 				row[column] = data.summary[column];
 			}
 			rows.push(row);
@@ -392,11 +396,13 @@ function cubesviewerViewCubeExplore() {
 						+ view.id + '"></div>');
 
 		var colNames = [];
+        var colLabels = [];
 		var colModel = [];
 		var dataRows = [];
 		var dataTotals = [];
 
-		for ( var column in data.summary) {
+		for ( var columnIdx in data.aggregates) {
+            var column = data.aggregates[columnIdx];
 			colNames.push(column);
 			colModel.push({
 				name : column,
@@ -460,6 +466,26 @@ function cubesviewerViewCubeExplore() {
 			}
 		};
 
+        colNames.forEach(function (e) {
+            var colLabel = null;
+            $(view.cube.aggregates).each(function (idx, ag) {
+                if (ag.name == e) {
+                    colLabel = ag.label||ag.name;
+                    return false;
+                }
+            });
+            if (!colLabel) {
+                $(view.cube.measures).each(function (idx, me) {
+                    if (me.name == e) {
+                        colLabel = me.label||ag.name;
+                        return false;
+                    }
+                });
+            }
+            //colLabel = view.cube.getDimension(e).label
+            colLabels.push(colLabel||e);
+        });
+
 		$('#summaryTable-' + view.id).get(0).idsOfSelectedRows = [];
 		$('#summaryTable-' + view.id)
 				.jqGrid(
@@ -470,7 +496,7 @@ function cubesviewerViewCubeExplore() {
 							height : 'auto',
 							rowNum : cubesviewer.options.pagingOptions[0],
 							rowList : cubesviewer.options.pagingOptions,
-							colNames : colNames,
+							colNames : colLabels,
 							colModel : colModel,
 							pager : "#summaryPager-" + view.id,
 							sortname : cubesviewer.views.cube.explore.defineColumnSort(view, ["key", "desc"])[0],

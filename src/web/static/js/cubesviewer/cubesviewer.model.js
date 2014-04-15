@@ -282,6 +282,7 @@ $.extend (cubesHierarchy.prototype, cubesLevel.prototype);
 $.extend (cubesHierarchy.prototype, {
 	
 	buildModel: function() {
+        this.label = this.label||this.name;
 	},
 	
 	/*

@@ -50,16 +50,20 @@ cubesviewer.cubesRequest = function(path, params, successCallback, completeCallb
 		// TODO: What is the correct ordering of success/complete callbacks?
 		successCallback(this.cache[requestHash].data);
 		completeCallback();
+        var dfd = $.Deferred();
 		
 		// Warn that data comes from cache (QTip can do this?)
 		var timediff = Math.round ((new Date().getTime() - this.cache[requestHash].time) / 1000 / 60);
 		if (timediff > cubesviewer.options.cacheNoticeAfterMinutes) {
 			cubesviewer.showInfoMessage("Data loaded from cache<br/>(" + timediff + " minutes old)", 1000);
 		}
-		
+
+        // Return resolved promise so that WorkspaceLoaded could work
+        dfd.resolve();
+        return dfd.promise();
 	} else {
 		// Do request
-		cubesviewer._cacheOverridedCubesRequest(path, params, this.cacheCubesRequestSuccess(successCallback, requestHash), completeCallback, errorCallback);
+		return cubesviewer._cacheOverridedCubesRequest(path, params, this.cacheCubesRequestSuccess(successCallback, requestHash), completeCallback, errorCallback);
 	}
 	
 }

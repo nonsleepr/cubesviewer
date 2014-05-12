@@ -49,6 +49,7 @@ cubesviewer._gaOverridedCubesRequest = cubesviewer.cubesRequest;
 
 cubesviewer.cubesRequest = function(path, params, successCallback, completeCallback, errorCallback) {
 	
+    // TODO: cubesRequest should return promise
 	cubesviewer._gaOverridedCubesRequest.apply(this, arguments);
 	
 	if (_gaq) {

@@ -91,7 +91,7 @@ function cubesviewer () {
 		} else {
 			jqxhr.fail (cubesviewer.defaultRequestErrorHandler);
 		}
-		
+		return jqxhr;
 	}
 	
 	this._cubesRequestCallback = function(pCallback) {
@@ -127,7 +127,6 @@ function cubesviewer () {
 			cubesviewer.showInfoMessage ('CubesViewer could not load workspace from Cubes server. CubesViewer will not work. Try reloading.<br /><br>Status: ' + xhr.status);
 			$(document).trigger("cubesviewerWorkspaceLoaded", null );
 		});
-		//$.get(this.options["cubesUrl"] + "/model", { "lang": this.options.cubesLang }, this._loadModelCallback());
 	};
 
 	this._loadWorkspaceCallback = function() {
@@ -135,9 +134,15 @@ function cubesviewer () {
 		return function(data) {
 			// Set new model
 			cubesviewer.workspace = cubesviewer.buildWorkspace(data);
-			
+
+            $.when.apply(cubesviewer.workspace, cubesviewer.workspace.promises).then(function () {
+                cubesviewer.state = "Initialized";
+                $(document).trigger("cubesviewerWorkspaceLoaded", [ cubesviewer.workspace ] );
+            });
+			/*
 			cubesviewer.state = "Initialized";
 			$(document).trigger("cubesviewerWorkspaceLoaded", [ cubesviewer.workspace ] )
+            */
 		}
 	};		
 	

@@ -29,11 +29,13 @@ cubesviewer.buildWorkspace = function(data) {
 	
     workspace = cubesWorkspace.prototype;
     workspace.cubes = data;
+    workspace.promises = [];
     $(workspace.cubes).each(function(idx, cube) {
         workspace.loadCube(idx, cube.name);
         $.extend(cube, cubesCube.prototype);
         cube.buildModel();
     });
+
 	return workspace;
 	
 };
@@ -42,14 +44,17 @@ cubesWorkspace = function() {};
 $.extend (cubesWorkspace.prototype, {
 
     loadCube: function(idx, cubename) {
-		cubesviewer.cubesRequest ("/cube/" + cubename + "/model", { "lang": cubesviewer.options.cubesLang }, this._loadModelCallback(idx), function() {}, function (xhr, textStatus, errorThrown) {
-			cubesviewer.state = "Failed to load cube";
+		var cr = cubesviewer.cubesRequest ("/cube/" + cubename + "/model", { "lang": cubesviewer.options.cubesLang }, this._loadCubeCallback(idx), function() {}, function (xhr, textStatus, errorThrown) {
+			cube.state = "Failed to load cube";
 			cubesviewer.showInfoMessage ('CubesViewer could not load cube from Cubes server. CubesViewer will not work. Try reloading.<br /><br>Status: ' + xhr.status);
 			$(document).trigger("cubesviewerCubeLoaded", null );
 		});
+
+        // TODO: DEBUG
+        this.promises.push(cr);
     },
 
-	_loadModelCallback: function(idx) {
+	_loadCubeCallback: function(idx) {
         var workspace = this;
 		return function(data) {
 			// Set new model
@@ -61,7 +66,7 @@ $.extend (cubesWorkspace.prototype, {
             $.extend(cube, cubesModel.prototype);
             cube.removeIgnoredDimensions();
 			
-			cubesviewer.state = "Initialized";
+			cube.state = "Initialized";
 			$(document).trigger("cubesviewerCubeLoaded", [ workspace.cubes[idx] ] )
 		}
 	},
